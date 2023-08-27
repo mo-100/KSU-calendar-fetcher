@@ -1,0 +1,1 @@
+fetches classes from ksu website to google calendar
