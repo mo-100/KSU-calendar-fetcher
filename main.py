@@ -1,22 +1,19 @@
 from __future__ import print_function
 
+import os
+import bs4
+import selenium.webdriver
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-import selenium.webdriver
+from selenium.webdriver.common.keys import Keys
 
-import bs4
-import os
-from dotenv import load_dotenv
-import datetime
-
-from class_event import ClassEvent
+import settings
+from class_event import KSUClass
 
 
 def get_driver() -> selenium.webdriver:
@@ -44,7 +41,7 @@ def get_rows(d: selenium.webdriver) -> bs4.element.ResultSet:
     return soup.findChildren("tr", recursive=False)
 
 
-def get_subjects(row_list: bs4.element.ResultSet) -> list[ClassEvent]:
+def get_subjects(row_list: bs4.element.ResultSet) -> list[KSUClass]:
     subject_list = list()
     for i, row in enumerate(row_list):
         columns = list(row)
@@ -63,61 +60,56 @@ def get_subjects(row_list: bs4.element.ResultSet) -> list[ClassEvent]:
             floor = temp[4].replace("f", "")
             room = temp[6].replace("r", "").strip() + temp[5].replace("w", "").strip()
             subject_list.append(
-                ClassEvent(symbol, full_name, mode, section, days, start_time, end_time, building, room, unit, floor)
+                KSUClass(symbol, full_name, mode, section, days, start_time, end_time, building, room, unit, floor)
             )
     return subject_list
 
 
-driver = get_driver()
-
-driver.get("https://edugate.ksu.edu.sa")
-
-load_dotenv()
-password = os.getenv("PASSWORD")
-username = os.getenv("USER")
-sign_in(driver, username, password)
-
-driver.get("https://edugate.ksu.edu.sa/ksu/ui/student/student_schedule/index/forwardStudentSchedule.faces")
-
-rows = get_rows(driver)
-
-driver.quit()
-
-subjects = get_subjects(rows)
-endDate = datetime.datetime(2023, 12, 7 + 1)
-
-SCOPES = [
-    "https://www.googleapis.com/auth/calendar",
-    "https://www.googleapis.com/auth/calendar.events"
-]
-
-try:
+def get_service():
+    scopes = [
+        "https://www.googleapis.com/auth/calendar",
+        "https://www.googleapis.com/auth/calendar.events"
+    ]
     creds = None
 
     if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        creds = Credentials.from_authorized_user_file('token.json', scopes)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                'credentials.json', scopes)
             creds = flow.run_local_server(port=0)
 
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
-    service = build('calendar', 'v3', credentials=creds)
+    return build('calendar', 'v3', credentials=creds)
 
-    names = []
 
-    for subject in subjects:
-        if subject.symbol not in names:
-            names.append(subject.symbol)
-        color = names.index(subject.symbol)
-        e = subject.toJson(endDate, color)
-        event = service.events().insert(calendarId='primary', body=e).execute()
-        print(f"event created: {event.get('htmlLink')}")
-except HttpError as e:
-    print('An error occurred: %s' % e)
+def main():
+    driver = get_driver()
+    driver.get("https://edugate.ksu.edu.sa")
+    sign_in(driver, settings.USERNAME, settings.PASSWORD)
+    driver.get("https://edugate.ksu.edu.sa/ksu/ui/student/student_schedule/index/forwardStudentSchedule.faces")
+    rows = get_rows(driver)
+    driver.quit()
+    subjects = get_subjects(rows)
+    try:
+        service = get_service()
+        names = []
+        for subject in subjects:
+            if subject.symbol not in names:
+                names.append(subject.symbol)
+            color = names.index(subject.symbol)
+            e = subject.toJson(settings.END_DATE, color)
+            event = service.events().insert(calendarId='primary', body=e).execute()
+            print(f"event created: {event.get('htmlLink')}")
+    except HttpError as e:
+        print('An error occurred: %s' % e)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,18 +1,14 @@
-import datetime
+import datetime as dt
 
 
-def isoweekday(day: int) -> int:
-    return [0, 7, 1, 2, 3, 4, 5, 6][day]
-
-
-class ClassEvent:
+class KSUClass:
     symbol: str
     full_name: str
     mode: str
     section: str
     days: list[int]
-    start_time: datetime.time
-    end_time: datetime.time
+    start_time: dt.time
+    end_time: dt.time
     building: str
     room: str
     unit: str
@@ -27,21 +23,21 @@ class ClassEvent:
         self.type = mode.strip()
         self.section = section.strip()
         self.days = [int(day) for day in days]
-        self.start_time = datetime.datetime.strptime(start_time.strip(), '%I:%M %p').time()
-        self.end_time = datetime.datetime.strptime(end_time.strip(), '%I:%M %p').time()
+        self.start_time = dt.datetime.strptime(start_time.strip(), '%I:%M %p').time()
+        self.end_time = dt.datetime.strptime(end_time.strip(), '%I:%M %p').time()
         self.building = building.strip()
         self.room = room.strip()
         self.unit = unit.strip()
         self.floor = floor.strip()
 
-    def get_days(self) -> list[str]:
+    def _get_days(self) -> list[str]:
         return [["", "SU", "MO", "TU", "WE", "TH", "FR", "SA"][day] for day in self.days]
 
-    def get_nearest_datetime(self) -> datetime.datetime:
-        isoweekdays = [isoweekday(day) for day in self.days]
-        now = datetime.datetime.now()
-        while now.isoweekday() not in isoweekdays:
-            now += datetime.timedelta(days=1)
+    def _get_nearest_datetime(self) -> dt.datetime:
+        iso_weekdays = [[0, 7, 1, 2, 3, 4, 5, 6][day] for day in self.days]
+        now = dt.datetime.now()
+        while now.isoweekday() not in iso_weekdays:
+            now += dt.timedelta(days=1)
         return now
 
     def _get_building(self) -> str:
@@ -58,25 +54,25 @@ class ClassEvent:
         return f"{self._get_building()}/{self._get_room()}"
 
     def __repr__(self) -> str:
-        return f"{self.symbol}, {self.get_days()}, {self.start_time} - {self.end_time}, {self._get_location()}"
+        return f"{self.symbol}, {self.days}, {self.start_time} - {self.end_time}, {self._get_location()}"
 
-    def toJson(self, until: datetime.datetime, color: int) -> dict:
+    def toJson(self, until: dt.datetime, color: int) -> dict:
         event = {
             "summary": self.symbol,
             "location": self._get_location(),
             "colorId": color % 12,
             "start": {
-                "dateTime": datetime.datetime.combine(self.get_nearest_datetime(), self.start_time).isoformat(),
+                "dateTime": dt.datetime.combine(self._get_nearest_datetime(), self.start_time).isoformat(),
                 "timeZone": "Asia/Riyadh"
             },
             "end": {
-                "dateTime": datetime.datetime.combine(self.get_nearest_datetime(), self.end_time).isoformat(),
+                "dateTime": dt.datetime.combine(self._get_nearest_datetime(), self.end_time).isoformat(),
                 "timeZone": "Asia/Riyadh"
             },
             "recurrence": [
                 f"RRULE:FREQ=WEEKLY"
-                f";UNTIL={until.isoformat().replace('-', '').replace(':', '')+'Z'}"
-                f";BYDAY={','.join(self.get_days())}"
+                f";UNTIL={until.isoformat().replace('-', '').replace(':', '') + 'Z'}"
+                f";BYDAY={','.join(self._get_days())}"
             ],
             'reminders': {
                 'useDefault': False,
