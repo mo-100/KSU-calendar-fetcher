@@ -6,6 +6,6 @@ how to use:<br>
     3. run main.py<br>
 
 to do:<br>
-add final events
-add additional info
-prevent events from duplicating
+add final events<br>
+add additional info<br>
+prevent events from duplicating<br>
