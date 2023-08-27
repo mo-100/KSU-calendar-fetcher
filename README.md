@@ -7,3 +7,5 @@ how to use:<br>
 
 to do:<br>
 add final events
+add additional info
+prevent events from duplicating
