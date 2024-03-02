@@ -7,4 +7,4 @@ load_dotenv()
 
 PASSWORD = os.getenv("PASSWORD")
 USERNAME = os.getenv("USER")
-END_DATE = dt.datetime(2023, 12, 7 + 1)
+END_DATE = dt.datetime(2024, 5, 16 + 1)
