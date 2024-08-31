@@ -5,8 +5,8 @@ from selenium.webdriver import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
-from classes.ksu_class import KSUClass
-from classes.ksu_final import KSUFinal
+from fetcher.ksu_class import KSUClass, make_class_from_text
+from fetcher.ksu_final import KSUFinal, make_final_from_text
 
 
 class SeleniumDriver:
@@ -41,7 +41,7 @@ class SeleniumDriver:
         for i, row in enumerate(row_list):
             columns = list(row)
             for time_rows in row.find("span", {"id": f"myForm:studScheduleTable:{i}:section"}).get_text().split("@n"):
-                subject_list.append(KSUClass.from_text(columns, time_rows))
+                subject_list.append(make_class_from_text(columns, time_rows))
         return subject_list
 
     def get_finals(self) -> list[KSUFinal]:
@@ -55,6 +55,6 @@ class SeleniumDriver:
         def final_from_row(row):
             text_columns = row.find_elements(by=By.TAG_NAME, value='td')
             text_columns_inner = [t.get_attribute('innerHTML') for t in text_columns]
-            return KSUFinal.from_text(text_columns_inner)
+            return make_final_from_text(text_columns_inner)
 
         return [final_from_row(row) for row in rows]

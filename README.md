@@ -1,11 +1,7 @@
-fetches classes and finals from ksu website to google calendar
+fetches classes and finals from ksu edugate website to calendar
 
-how to use:<br>
-    1. configure end date in settings.py<br>
-    2. write student number and password in .env<br>
-    3. run main.py<br>
+### how to use:
 
-- install google api: pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
-to do:<br>
-add additional info<br>
-prevent events from duplicating<br>
+1. run main.py
+2. enter browser and login credentials
+
