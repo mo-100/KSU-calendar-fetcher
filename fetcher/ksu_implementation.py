@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver import Keys
 
-from fetcher.models import CalendarEvent, CalendarScraper
+from fetcher.abstract_classes import CalendarEvent, CalendarScraper
 from fetcher.utils.date_utils import get_nearest_datetime, get_day_abbr
 from fetcher.utils.ical_utils import make_alarm
 
@@ -146,17 +146,19 @@ class KSUCalendarScraper(CalendarScraper):
     def log_in(self):
         self.webdriver.get("https://edugate.ksu.edu.sa")
         time.sleep(.5)
-        self.webdriver.find_element(by=By.XPATH,
-                                    value="//label[@class='pui-dropdown-label pui-inputtext ui-corner-all']").click()
-        self.webdriver.find_element(by=By.XPATH, value="//li[@data-label='طالب']").click()
+        # self.webdriver.find_element(by=By.XPATH,
+        #                             value="//label[@class='pui-dropdown-label pui-inputtext ui-corner-all']").click()
+        # self.webdriver.find_element(by=By.XPATH, value="//li[@data-label='طالب']").click()
 
         username_field = self.webdriver.find_element(by=By.ID, value="username")
         username_field.send_keys(self.username)
 
         password_field = self.webdriver.find_element(by=By.ID, value="password")
         password_field.send_keys(self.password)
+
         password_field.send_keys(Keys.RETURN)
         time.sleep(.5)
+
         self.logged_in = True
 
     def get_classes(self) -> list[CalendarEvent]:

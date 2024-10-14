@@ -2,7 +2,7 @@ import datetime
 
 from icalendar import Timezone, TimezoneStandard, Alarm, Calendar
 
-from fetcher.models import CalendarEvent
+from fetcher.abstract_classes import CalendarEvent
 
 
 def make_ksa_timezone() -> Timezone:

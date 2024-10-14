@@ -1,7 +1,7 @@
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver import Firefox, Chrome, Edge, Safari
 
-from fetcher.models_ksu import KSUCalendarScraper
+from fetcher.ksu_implementation import KSUCalendarScraper
 from fetcher.utils.ical_utils import make_ksa_timezone, make_calendar_from_events
 
 
