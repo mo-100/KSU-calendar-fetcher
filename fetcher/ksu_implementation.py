@@ -145,10 +145,7 @@ class KSUCalendarScraper(CalendarScraper):
 
     def log_in(self):
         self.webdriver.get("https://edugate.ksu.edu.sa")
-        time.sleep(.5)
-        # self.webdriver.find_element(by=By.XPATH,
-        #                             value="//label[@class='pui-dropdown-label pui-inputtext ui-corner-all']").click()
-        # self.webdriver.find_element(by=By.XPATH, value="//li[@data-label='طالب']").click()
+        time.sleep(1)
 
         username_field = self.webdriver.find_element(by=By.ID, value="username")
         username_field.send_keys(self.username)
@@ -157,7 +154,7 @@ class KSUCalendarScraper(CalendarScraper):
         password_field.send_keys(self.password)
 
         password_field.send_keys(Keys.RETURN)
-        time.sleep(.5)
+        time.sleep(1)
 
         self.logged_in = True
 
@@ -217,7 +214,9 @@ class KSUCalendarScraper(CalendarScraper):
                 print('logging in')
                 self.log_in()
                 print('logged in')
+            print("getting finals")
             finals = self.get_finals()
+            print("getting classes")
             classes = self.get_classes()
             return finals + classes
         except Exception as e:
