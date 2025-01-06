@@ -14,7 +14,7 @@ from fetcher.abstract_classes import CalendarEvent, CalendarScraper
 from fetcher.utils.date_utils import get_nearest_datetime, get_day_abbr
 from fetcher.utils.ical_utils import make_alarm
 
-LAST_STUDY_DAY = datetime.datetime(2024, 12, 7 + 1)
+LAST_STUDY_DAY = datetime.datetime(2025, 5, 8 + 1)
 
 
 @dataclass
