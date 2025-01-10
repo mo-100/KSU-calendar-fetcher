@@ -26,7 +26,9 @@ def main():
     events = scraper.get_events()
     print("scrape done")
 
-    print(f"found {set([e.symbol for e in events])}")
+    print("found: ")
+    for e in events:
+        print(e)
 
     calendar = make_calendar_from_events(
         events=events,
