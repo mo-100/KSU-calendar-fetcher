@@ -1,5 +1,4 @@
 import datetime
-import time
 from dataclasses import dataclass
 
 import bs4
@@ -9,12 +8,13 @@ from icalendar import Event, vText
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import StaleElementReferenceException
 
 from fetcher.abstract_classes import CalendarEvent, CalendarScraper
 from fetcher.utils.date_utils import get_nearest_datetime, get_day_abbr
 from fetcher.utils.ical_utils import make_alarm
-
-LAST_STUDY_DAY = datetime.datetime(2025, 5, 8 + 1)
+from fetcher.utils.config import LAST_STUDY_DAY, DRIVER_WAIT_TIME, CLASS_ALARM, FINAL_ALARM
 
 
 @dataclass
@@ -56,8 +56,8 @@ class KSUFinal(CalendarEvent):
         event.add('dtstamp', datetime.datetime.now(pytz.utc))
         event.add_component(
             make_alarm(
-                datetime.timedelta(hours=24),
-                msg=f'Reminder: final in {24} hours',
+                datetime.timedelta(hours=FINAL_ALARM),
+                msg=f'Reminder: final in {FINAL_ALARM} hours',
             )
         )
         return event
@@ -116,7 +116,7 @@ class KSUClass(CalendarEvent):
 
         event = Event()
 
-        event.add('summary', self.symbol)
+        event.add('summary', f'{self.type_} {self.symbol}')
         event.add('location', vText(self.location))
         event.add('dtstart', start_date)
         event.add('dtend', end_date)
@@ -129,8 +129,8 @@ class KSUClass(CalendarEvent):
         event.add('dtstamp', datetime.datetime.now(pytz.utc))
         event.add_component(
             make_alarm(
-                datetime.timedelta(minutes=10),
-                msg=f'Reminder: class in {10} minutes'
+                datetime.timedelta(minutes=CLASS_ALARM),
+                msg=f'Reminder: class in {CLASS_ALARM} minutes'
             )
         )
         return event
@@ -145,7 +145,6 @@ class KSUCalendarScraper(CalendarScraper):
 
     def log_in(self):
         self.webdriver.get("https://edugate.ksu.edu.sa")
-        time.sleep(1)
 
         username_field = self.webdriver.find_element(by=By.ID, value="username")
         username_field.send_keys(self.username)
@@ -154,13 +153,17 @@ class KSUCalendarScraper(CalendarScraper):
         password_field.send_keys(self.password)
 
         password_field.send_keys(Keys.RETURN)
-        time.sleep(1)
+        
+        try:
+            wait = WebDriverWait(self.webdriver, timeout=DRIVER_WAIT_TIME)
+            wait.until(lambda d : not password_field.is_displayed())
+        except StaleElementReferenceException:
+            pass
 
         self.logged_in = True
 
     def get_classes(self) -> list[CalendarEvent]:
         self.webdriver.get("https://edugate.ksu.edu.sa/ksu/ui/student/student_schedule/index/forwardStudentSchedule.faces")
-        time.sleep(1)
 
         table = self.webdriver.find_element(by=By.ID, value="myForm:studScheduleTable")
         soup = bs4.BeautifulSoup(table.get_attribute("innerHTML"), "html.parser")
@@ -181,7 +184,6 @@ class KSUCalendarScraper(CalendarScraper):
 
     def get_finals(self) -> list[CalendarEvent]:
         self.webdriver.get('https://edugate.ksu.edu.sa/ksu/ui/student/final_exams/index/forwardFinalExams.faces')
-        time.sleep(1)
 
         rows = self.webdriver.find_elements(by=By.CLASS_NAME, value='ROW1')
         rows.extend(self.webdriver.find_elements(by=By.CLASS_NAME, value='ROW2'))
@@ -222,4 +224,5 @@ class KSUCalendarScraper(CalendarScraper):
         except Exception as e:
             raise e
         finally:
+            print('quitting webdriver')
             self.webdriver.quit()

@@ -1,26 +1,11 @@
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver import Firefox, Chrome, Edge, Safari
-
 from fetcher.ksu_implementation import KSUCalendarScraper
 from fetcher.utils.ical_utils import make_ksa_timezone, make_calendar_from_events
+from fetcher.utils.selenium_utils import valid_drivers, get_web_driver
 import sys
-
-valid_drivers = {'chrome', 'firefox', 'edge', 'safari'}
-def get_web_driver(driver: str) -> WebDriver:
-    match driver.lower():
-        case 'chrome':
-            return Chrome()
-        case 'firefox':
-            return Firefox()
-        case 'edge':
-            return Edge()
-        case 'safari':
-            return Safari()
-        case _:
-            raise Exception('Invalid input')
 
 
 def main():
+    # parse args
     args = sys.argv[1:]
     if len(args) != 3:
         print("invalid arguments")
@@ -31,6 +16,7 @@ def main():
         return
     username = args[1]
     password = args[2]
+
 
     print(f"opening {browser} browser")
     webdriver = get_web_driver(browser)
