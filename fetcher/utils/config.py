@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 import datetime
+import json
 
 
 cfg = ConfigParser()
@@ -14,3 +15,7 @@ else:
 DRIVER_WAIT_TIME = int(cfg['scraper.settings']['WaitTime'])
 CLASS_ALARM = int(cfg['alarm.settings']['ClassAlarmBefore'])
 FINAL_ALARM = int(cfg['alarm.settings']['FinalAlarmBefore'])
+
+with open('replace.json', 'r', encoding='utf-8') as f:
+    replaces = json.load(f)
+    REPLACE_LIST: list[tuple[str, str]] = [(r['from'], r['to']) for r in replaces]

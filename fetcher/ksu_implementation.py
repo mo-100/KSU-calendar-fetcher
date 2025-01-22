@@ -15,6 +15,7 @@ from fetcher.abstract_classes import CalendarEvent, CalendarScraper
 from fetcher.utils.date_utils import get_nearest_datetime, get_day_abbr
 from fetcher.utils.ical_utils import make_alarm
 from fetcher.utils.config import LAST_STUDY_DAY, DRIVER_WAIT_TIME, CLASS_ALARM, FINAL_ALARM
+from fetcher.utils.string_utils import apply_replaces
 
 
 @dataclass
@@ -49,7 +50,7 @@ class KSUFinal(CalendarEvent):
 
         event = Event()
 
-        event.add('summary', f'{self.symbol} final')
+        event.add('summary', apply_replaces(f'{self.symbol} final'))
         event.add('dtstart', start_date)
         event.add('dtend', end_date)
         event.add('uid', f'{self.symbol}-final')
@@ -116,7 +117,7 @@ class KSUClass(CalendarEvent):
 
         event = Event()
 
-        event.add('summary', f'{self.type_} {self.symbol}')
+        event.add('summary', apply_replaces(f'{self.type_} {self.symbol}'))
         event.add('location', vText(self.location))
         event.add('dtstart', start_date)
         event.add('dtend', end_date)
