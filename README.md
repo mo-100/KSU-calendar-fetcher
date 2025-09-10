@@ -19,7 +19,7 @@ Before you begin, ensure you have:
 ## Installation
 1. Clone this repository:
 ```bash
-git clone https://github.com/M01010/KSU-Calendar-Fetcher.git
+git clone https://github.com/mo-100/KSU-Calendar-Fetcher.git
 cd KSU-Calendar-Fetcher
 ```
 2. Install the required dependencies:
